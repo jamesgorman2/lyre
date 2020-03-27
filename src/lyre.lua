@@ -26,7 +26,9 @@ local zth = require "lzmq.threads"
 
 local function rand_str(n)
   local t = {}
-  for i = 1, n do t[i] = string.char( math.random(string.byte('a'), string.byte('z')) ) end
+  for i = 1, n do
+    t[i] = string.char( math.random(string.byte('a'), string.byte('z')) )
+  end
   return table.concat(t)
 end
 
@@ -52,10 +54,10 @@ function Node:new(ctx, name)
 
   if not ctx then ctx = zth.context() end
 
-  local inbox, endpoind = make_pipe(ctx)
-  if not inbox then return nil, endpoind end
+  local inbox, endpoint = make_pipe(ctx)
+  if not inbox then return nil, endpoint end
   
-  local actor = zth.actor(ctx, lyre_node_thread, endpoind, name)
+  local actor = zth.actor(ctx, lyre_node_thread, endpoint, name)
 
   local ok, err = actor:start()
   if not ok then 
@@ -110,6 +112,11 @@ function Node:name()
     self._private.name = self:_recv()
   end
   return self._private.name
+end
+
+function Node:peers()
+  self:_send("PEERS")
+  return self:_recv()
 end
 
 function Node:set_header(key, value)

@@ -50,16 +50,21 @@ function Message:new(id, header, ...)
   local content = ...
   if select("#", ...) > 1 then content = {...} end
 
-  return setmetatable({
-    _id      = id,
-    _header  = header,
-    _content = content,
-  }, self)
+  return setmetatable(
+    {
+      _id      = id,
+      _header  = header,
+      _content = content,
+    },
+    self
+  )
 end
 
 function Message:send(peer, s)
-  local header = Buffer():write(MESSAGE_HEADER,
-    ZRE.SIGNATURE, self._id,
+  local header = Buffer():write(
+    MESSAGE_HEADER,
+    ZRE.SIGNATURE,
+    self._id,
     peer:version(),
     peer:next_sent_sequence()
   )
@@ -92,9 +97,13 @@ end
 local MessageEncoder = {} do
 
 function MessageEncoder.beacon(node, port)
-  return Buffer():write(BEACON_HEADER, 
-    ZRE.BEACON_PREFIX, node:uuid(), port
-  ):data()
+  return Buffer():write(
+    BEACON_HEADER,
+    ZRE.BEACON_PREFIX,
+    node:uuid(),
+    port
+  )
+    :data()
 end
 
 function MessageEncoder.HELLO(node)

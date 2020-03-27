@@ -12,22 +12,40 @@ local uuid = require "uuid"
 
 local function StrUuidToBin(u)
   assert(#u == 36)
-  return (string.gsub(u, "([^-][^-])%-?",function(ch)
-    return string.char(tonumber(ch, 16))
-  end))
+  return (
+    string.gsub(
+      u,
+      "([^-][^-])%-?",
+      function(ch)
+        return string.char(tonumber(ch, 16))
+      end
+    )
+  )
 end
 
 local function Hex(s)
-  return (string.gsub(s, ".",function(ch)
-    return string.format("%.2x",string.byte(ch))
-  end))
+  return (
+    string.gsub(
+      s,
+      ".",
+      function(ch)
+        return string.format("%.2x",string.byte(ch))
+      end
+    )
+  )
 end
 
 local function BinUuidToStr(u)
   assert(#u == 16)
-  return (string.gsub(u, "^(....)(..)(..)(..)(......)$", function(a,b,c,d,e)
-    return Hex(a) .. "-" .. Hex(b) .. "-" .. Hex(c) .. "-" .. Hex(d) .. "-" .. Hex(e)
-  end))
+  return (
+    string.gsub(
+      u,
+      "^(....)(..)(..)(..)(......)$",
+      function(a,b,c,d,e)
+        return Hex(a) .. "-" .. Hex(b) .. "-" .. Hex(c) .. "-" .. Hex(d) .. "-" .. Hex(e)
+      end
+    )
+  )
 end
 
 local function NewStrUuid()

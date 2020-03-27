@@ -10,8 +10,8 @@
 
 ---------------------------------------------------------------------
 --  Constants, to be configured/reviewed
-local PEER_EVASIVE       = 3000   --  3 seconds' silence is evasive
-local PEER_EXPIRED       = 5000   --  5 seconds' silence is expired
+local PEER_EVASIVE       = 5000   --  3 seconds' silence is evasive
+local PEER_EXPIRED       = 10000   --  5 seconds' silence is expired
 local REAP_INTERVAL      = 1000   --  Once per second
 ---------------------------------------------------------------------
 
@@ -76,6 +76,10 @@ end
 
 API[ "UUID"           ] = function (self, pipe)
   return self:api_response(self:uuid(true))
+end
+
+API[ "PEERS"          ] = function (self, pipe, group)
+  return self:api_response(self._private.peers)
 end
 
 API[ "NAME"           ] = function (self, pipe)
@@ -204,7 +208,10 @@ NODE_MESSAGE[ "HELLO"   ] = function(node, version, uuid, sequence, endpoint, gr
   end
 
   -- Tell the caller about the peer
-  node:send("ENTER", peer:uuid(true), peer:name(), 
+  node:send(
+    "ENTER",
+    peer:uuid(true),
+    peer:name(),
     Buffer():write_hash(peer:headers()):data(),
     peer:endpoint()
   )
@@ -346,7 +353,8 @@ function Node:new(pipe, outbox)
     interval = REAP_INTERVAL or 0; -- beacon internal
     host     = LYRE_MYIP;          -- beacon host
     port     = ZRE.DISCOVERY_PORT; -- beacon port
-    logger   = LogLib.new('none',
+    logger   = LogLib.new(
+      'none',
       function(...) return o._private.log_writer(...) end,
       o:_formatter(require "log.formatter.concat".new(''))
     );
