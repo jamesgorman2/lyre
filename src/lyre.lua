@@ -115,8 +115,21 @@ function Node:name()
 end
 
 function Node:peers()
+  function remove_terminator(a)
+    i = nil
+    for k, v in pairs(a) do
+      if v == "-1" then
+        i = k
+        break
+      end
+    end
+    if i ~= nil then table.remove(a, i) end
+    return a
+  end
   self:_send("PEERS")
-  return self:_recv()
+  local ps = self:_recv()
+  if type(ps) == "string" then ps = {ps} end
+  return remove_terminator(ps)
 end
 
 function Node:set_header(key, value)

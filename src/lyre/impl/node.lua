@@ -79,7 +79,11 @@ API[ "UUID"           ] = function (self, pipe)
 end
 
 API[ "PEERS"          ] = function (self, pipe, group)
-  return self:api_response(self._private.peers)
+  local a = {}
+  for i, p in pairs(self._private.peers) do
+    a[i] = p:uuid(true)
+  end
+  return self:api_response(a)
 end
 
 API[ "NAME"           ] = function (self, pipe)
@@ -695,9 +699,21 @@ function Node:beacon_port(v)
 end
 
 function Node:api_response(ok, err)
+  function all_strings(a)
+    for k, v in pairs(a) do
+      if type(v) ~= "string" then return false end
+    end
+    return true
+  end
+
   if ok then 
     if type(ok) == 'string' then
       return self._private.pipe:send(ok)
+    elseif type(ok) == 'table' and all_strings(ok) then
+      for k, v in pairs(ok)do
+        self._private.pipe:send_more(v)
+      end
+      return self._private.pipe:send("-1")
     end
     return self._private.pipe:send("1")
   end
@@ -717,6 +733,7 @@ function Node:shout(name, ...)
 end
 
 function Node:whisper(uuid, ...)
+  if type(uuid) == 'string' then uuid = UUID.to_binary(uuid) end
   local p = self._private
   local peer = p.peers[uuid]
   if not peer then return true end
